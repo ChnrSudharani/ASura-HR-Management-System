@@ -1,0 +1,19 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Java / Maven
+target/
+*.class
+
+# Node
+node_modules/
+dist/
+
+# Environment / secrets
+.env
+.env.*
+application-local.properties
+
+# macOS
+.DS_Store
