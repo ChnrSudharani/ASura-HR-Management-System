@@ -1,4 +1,4 @@
-function Dashboard({ email, onLogout }) {
+function Dashboard({ email, onLogout, onEmployeesClick }) {
     return (
         <div className="dashboard-page">
 
@@ -17,7 +17,10 @@ function Dashboard({ email, onLogout }) {
                         Dashboard
                     </button>
 
-                    <button className="nav-item">
+                    <button
+                        className="nav-item"
+                        onClick={onEmployeesClick}
+                    >
                         <span>♙</span>
                         Employees
                     </button>

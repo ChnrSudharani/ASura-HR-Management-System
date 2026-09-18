@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import '../App.css'
 
@@ -7,7 +8,7 @@ function Login({ onLogin }) {
     const [errors, setErrors] = useState({})
     const [showPassword, setShowPassword] = useState(false)
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault()
 
         const newErrors = {}
@@ -26,8 +27,50 @@ function Login({ onLogin }) {
 
         setErrors(newErrors)
 
-        if (Object.keys(newErrors).length === 0) {
-            onLogin(email)
+        if (Object.keys(newErrors).length > 0) {
+            return
+        }
+
+        try {
+            const response = await fetch(
+                'http://localhost:8080/api/auth/login',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                }
+            )
+
+            if (!response.ok) {
+                throw new Error('Invalid email or password')
+            }
+
+            const user = await response.json()
+
+            // Store JWT token securely in browser storage
+            localStorage.setItem('token', user.token)
+
+            // Store user details for the current session
+            localStorage.setItem(
+                'user',
+                JSON.stringify({
+                    id: user.id,
+                    email: user.email,
+                    role: user.role
+                })
+            )
+
+            onLogin(user.email)
+
+        } catch (error) {
+            setErrors({
+                password: 'Invalid email or password'
+            })
         }
     }
 

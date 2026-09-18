@@ -1,0 +1,129 @@
+.add-employee-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.add-employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.add-employee-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.add-employee-header p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.add-employee-close {
+    border: none;
+    background: transparent;
+    font-size: 28px;
+    color: #64748b;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.add-employee-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.add-employee-form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.add-employee-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.add-employee-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.add-employee-field input,
+.add-employee-field select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 14px;
+    background: white;
+}
+
+.add-employee-field input:focus,
+.add-employee-field select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.add-employee-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.add-employee-cancel,
+.add-employee-save {
+    border: none;
+    border-radius: 7px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-employee-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.add-employee-save {
+    background: #2563eb;
+    color: white;
+}
+
+.add-employee-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 1000px) {
+    .add-employee-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .add-employee-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.field-error {
+    color: #dc2626;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: 2px;
+}
