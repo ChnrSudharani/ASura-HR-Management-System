@@ -15,7 +15,13 @@ function getSavedSession() {
             const token = storage.getItem('token')
             const savedUser = storage.getItem('user')
 
-            if (!token || !savedUser) {
+            if (
+                !token ||
+                token.trim() === '' ||
+                token === 'null' ||
+                token === 'undefined' ||
+                !savedUser
+            ) {
                 continue
             }
 
@@ -24,11 +30,11 @@ function getSavedSession() {
             if (user.email && user.role) {
                 return {
                     email: user.email,
-                    role: user.role
+                    role: user.role.toUpperCase()
                 }
             }
         } catch {
-            // Ignore invalid saved session data and try the next storage.
+            // Ignore invalid saved session data.
         }
     }
 
@@ -42,21 +48,24 @@ function App() {
     const [userRole, setUserRole] = useState(savedSession?.role || 'EMPLOYEE')
     const [currentPage, setCurrentPage] = useState('dashboard')
 
+    const canManageEmployees =
+        userRole === 'HR_ADMIN' || userRole === 'MANAGER'
+
     const handleLogin = (email) => {
         let role = 'EMPLOYEE'
 
         try {
-            const user =
-                JSON.parse(
-                    localStorage.getItem('user') ||
-                    sessionStorage.getItem('user') ||
-                    '{}'
-                )
+            const savedUser =
+                localStorage.getItem('user') ||
+                sessionStorage.getItem('user') ||
+                '{}'
 
-            role = user.role || 'EMPLOYEE'
+            const user = JSON.parse(savedUser)
+
+            role = (user.role || 'EMPLOYEE').toUpperCase()
             email = user.email || email
         } catch {
-            // Keep the fallback role if saved user data is invalid.
+            // Use the fallback role if saved user data is invalid.
         }
 
         setUserEmail(email)
@@ -77,10 +86,26 @@ function App() {
         setCurrentPage('dashboard')
     }
 
-    const goToDashboard = () => setCurrentPage('dashboard')
-    const goToEmployees = () => setCurrentPage('employees')
-    const goToAttendance = () => setCurrentPage('attendance')
-    const goToLeave = () => setCurrentPage('leave')
+    const goToDashboard = () => {
+        setCurrentPage('dashboard')
+    }
+
+    const goToEmployees = () => {
+        if (!canManageEmployees) {
+            setCurrentPage('dashboard')
+            return
+        }
+
+        setCurrentPage('employees')
+    }
+
+    const goToAttendance = () => {
+        setCurrentPage('attendance')
+    }
+
+    const goToLeave = () => {
+        setCurrentPage('leave')
+    }
 
     if (!isLoggedIn) {
         return <Login onLogin={handleLogin} />
@@ -95,7 +120,7 @@ function App() {
                 onLeaveClick: goToLeave
             }}
         >
-            {currentPage === 'employees' ? (
+            {currentPage === 'employees' && canManageEmployees ? (
                 <Employees
                     email={userEmail}
                     onDashboardClick={goToDashboard}

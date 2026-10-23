@@ -28,7 +28,26 @@ function Employees({
             setLoading(true)
             setError('')
 
-            const token = localStorage.getItem('token')
+            // Read the token from either browser storage.
+            const localToken = localStorage.getItem('token')
+            const sessionToken = sessionStorage.getItem('token')
+
+            const isValidStoredToken = (value) =>
+                value &&
+                value !== 'null' &&
+                value !== 'undefined' &&
+                value.trim() !== ''
+
+            const token = isValidStoredToken(localToken)
+                ? localToken
+                : isValidStoredToken(sessionToken)
+                    ? sessionToken
+                    : null
+
+            if (!token) {
+                setError('Your login session is missing. Please sign in again.')
+                return
+            }
 
             const response = await fetch(
                 'http://localhost:8080/api/employees',
@@ -36,18 +55,36 @@ function Employees({
                     method: 'GET',
                     headers: {
                         Authorization: `Bearer ${token}`,
+                        Accept: 'application/json',
                     },
                 }
             )
 
+            if (response.status === 401 || response.status === 403) {
+                throw new Error(
+                    response.status === 401
+                        ? 'Your login session is invalid or expired. Please sign in again.'
+                        : 'Access denied (403). Your token may be invalid, or your account may not have permission to view employees.'
+                )
+            }
+
             if (!response.ok) {
-                throw new Error('Unable to load employees')
+                throw new Error(
+                    `Unable to load employees. Server returned ${response.status}.`
+                )
             }
 
             const data = await response.json()
+
+            if (!Array.isArray(data)) {
+                throw new Error(
+                    'The server returned an unexpected employee response.'
+                )
+            }
+
             setEmployees(data)
         } catch (err) {
-            setError(err.message)
+            setError(err.message || 'Unable to load employees.')
         } finally {
             setLoading(false)
         }
@@ -244,8 +281,13 @@ function Employees({
                                                     </div>
                                                 </td>
 
-                                                <td>{employee.jobTitle || '-'}</td>
-                                                <td>{employee.role || '-'}</td>
+                                                <td>
+                                                    {employee.jobTitle || '-'}
+                                                </td>
+
+                                                <td>
+                                                    {employee.role || '-'}
+                                                </td>
 
                                                 <td>
                                                         <span
