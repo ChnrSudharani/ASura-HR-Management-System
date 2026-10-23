@@ -183,7 +183,16 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
             setSaving(true)
 
             const token =
-                localStorage.getItem('token')
+                localStorage.getItem('token') ||
+                sessionStorage.getItem('token')
+
+            if (!token || token === 'null' || token === 'undefined') {
+                setErrors((currentErrors) => ({
+                    ...currentErrors,
+                    form: 'Your login session has expired. Please log in again.'
+                }))
+                return
+            }
 
             const cleanedData = {
                 firstName: formData.firstName.trim(),
