@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react'
 import './EditEmployee.css'
 
 function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
-
     const [saving, setSaving] = useState(false)
-    const [error, setError] = useState('')
+    const [errors, setErrors] = useState({})
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -27,10 +26,12 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
                 phone: employee.phone || '',
                 department: employee.department || '',
                 jobTitle: employee.jobTitle || '',
-                role: employee.role || 'EMPLOYEE',
+                role: employee.role || '',
                 joiningDate: employee.joiningDate || '',
-                employmentStatus: employee.employmentStatus || 'ACTIVE'
+                employmentStatus: employee.employmentStatus || ''
             })
+
+            setErrors({})
         }
     }, [employee])
 
@@ -41,16 +42,161 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
             ...currentData,
             [name]: value
         }))
+
+        setErrors((currentErrors) => ({
+            ...currentErrors,
+            [name]: '',
+            form: ''
+        }))
+    }
+
+    const validateForm = () => {
+        const newErrors = {}
+
+        const firstName = formData.firstName.trim()
+        const lastName = formData.lastName.trim()
+        const email = formData.email.trim()
+        const phone = formData.phone.trim()
+        const department = formData.department.trim()
+        const jobTitle = formData.jobTitle.trim()
+        const role = formData.role.trim()
+        const joiningDate = formData.joiningDate.trim()
+        const employmentStatus =
+            formData.employmentStatus.trim()
+
+        const namePattern =
+            /^[A-Za-zÀ-ÿ]+(?:[ '-][A-Za-zÀ-ÿ]+)*$/
+
+        const emailPattern =
+            /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/
+
+        const phonePattern =
+            /^\+?[0-9][0-9\s()-]*$/
+
+        const jobTitlePattern =
+            /^(?=.*[A-Za-zÀ-ÿ])[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 '&/().,-]*$/
+
+        // First Name
+        if (!firstName) {
+            newErrors.firstName =
+                'First name is required.'
+        } else if (!namePattern.test(firstName)) {
+            newErrors.firstName =
+                'First name can contain only letters, spaces, hyphens or apostrophes.'
+        }
+
+        // Last Name
+        if (!lastName) {
+            newErrors.lastName =
+                'Last name is required.'
+        } else if (!namePattern.test(lastName)) {
+            newErrors.lastName =
+                'Last name can contain only letters, spaces, hyphens or apostrophes.'
+        }
+
+        // Email
+        if (!email) {
+            newErrors.email =
+                'Email address is required.'
+        } else if (/\s/.test(email)) {
+            newErrors.email =
+                'Email address must not contain spaces.'
+        } else if (!emailPattern.test(email)) {
+            newErrors.email =
+                'Please enter a valid email address, for example name@example.com.'
+        }
+
+        // Phone
+        if (!phone) {
+            newErrors.phone =
+                'Phone number is required.'
+        } else if (!phonePattern.test(phone)) {
+            newErrors.phone =
+                'Phone number can contain only numbers, spaces, +, hyphens and brackets.'
+        } else {
+            const digitsOnly =
+                phone.replace(/\D/g, '')
+
+            if (
+                digitsOnly.length < 9 ||
+                digitsOnly.length > 15
+            ) {
+                newErrors.phone =
+                    'Phone number must contain between 9 and 15 digits.'
+            } else if (/^(\d)\1+$/.test(digitsOnly)) {
+                newErrors.phone =
+                    'Please enter a valid phone number.'
+            } else if (digitsOnly === '1234567890') {
+                newErrors.phone =
+                    'Please enter a valid phone number.'
+            }
+        }
+
+        // Department
+        if (!department) {
+            newErrors.department =
+                'Department is required.'
+        }
+
+        // Job Title
+        if (!jobTitle) {
+            newErrors.jobTitle =
+                'Job title is required.'
+        } else if (!jobTitlePattern.test(jobTitle)) {
+            newErrors.jobTitle =
+                'Please enter a valid job title.'
+        }
+
+        // Role
+        if (!role) {
+            newErrors.role =
+                'Please select an employee role.'
+        }
+
+        // Joining Date
+        if (!joiningDate) {
+            newErrors.joiningDate =
+                'Joining date is required.'
+        }
+
+        // Employment Status
+        if (!employmentStatus) {
+            newErrors.employmentStatus =
+                'Please select an employment status.'
+        }
+
+        setErrors(newErrors)
+
+        return Object.keys(newErrors).length === 0
     }
 
     const handleSubmit = async (event) => {
         event.preventDefault()
 
+        const isValid = validateForm()
+
+        if (!isValid) {
+            return
+        }
+
         try {
             setSaving(true)
-            setError('')
 
-            const token = localStorage.getItem('token')
+            const token =
+                localStorage.getItem('token')
+
+            const cleanedData = {
+                firstName: formData.firstName.trim(),
+                lastName: formData.lastName.trim(),
+                email: formData.email.trim().toLowerCase(),
+                phone: formData.phone.trim(),
+                department: formData.department.trim(),
+                jobTitle: formData.jobTitle.trim(),
+                role: formData.role.trim(),
+                joiningDate: formData.joiningDate,
+                employmentStatus:
+                    formData.employmentStatus.trim()
+            }
 
             const response = await fetch(
                 `http://localhost:8080/api/employees/${employee.id}`,
@@ -58,29 +204,82 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
+                        Authorization: 'Bearer ' + token
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(cleanedData)
                 }
             )
 
             if (!response.ok) {
-                const message = await response.text()
+                const message =
+                    await response.text()
+
+                if (
+                    message.toLowerCase().includes(
+                        'email address already exists'
+                    ) ||
+                    message.toLowerCase().includes(
+                        'email already exists'
+                    )
+                ) {
+                    setErrors((currentErrors) => ({
+                        ...currentErrors,
+                        email:
+                            'Email address already exists. Please use a different email address.',
+                        form: ''
+                    }))
+
+                    return
+                }
+
+                if (
+                    message.toLowerCase().includes(
+                        'phone number'
+                    ) ||
+                    message.toLowerCase().includes(
+                        'valid phone number'
+                    )
+                ) {
+                    setErrors((currentErrors) => ({
+                        ...currentErrors,
+                        phone: message,
+                        form: ''
+                    }))
+
+                    return
+                }
+
+                if (
+                    message.toLowerCase().includes(
+                        'job title'
+                    )
+                ) {
+                    setErrors((currentErrors) => ({
+                        ...currentErrors,
+                        jobTitle: message,
+                        form: ''
+                    }))
+
+                    return
+                }
 
                 throw new Error(
-                    message || 'Unable to update employee'
+                    message ||
+                    'Unable to update employee.'
                 )
             }
 
-            const updatedEmployee = await response.json()
+            const updatedEmployee =
+                await response.json()
 
             onEmployeeUpdated(updatedEmployee)
-
             onClose()
 
         } catch (err) {
-            setError(err.message)
-
+            setErrors((currentErrors) => ({
+                ...currentErrors,
+                form: err.message
+            }))
         } finally {
             setSaving(false)
         }
@@ -93,22 +292,26 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
 
                 <div>
                     <h2>Edit Employee</h2>
-                    <p>Update employee information</p>
+
+                    <p>
+                        Update employee information
+                    </p>
                 </div>
 
                 <button
                     type="button"
                     className="edit-employee-close"
                     onClick={onClose}
+                    disabled={saving}
                 >
                     ×
                 </button>
 
             </div>
 
-            {error && (
+            {errors.form && (
                 <div className="edit-employee-error">
-                    {error}
+                    {errors.form}
                 </div>
             )}
 
@@ -116,94 +319,154 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
 
                 <div className="edit-employee-form-grid">
 
+                    {/* First Name */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-firstName">
-                            First Name *
+                            First Name
                         </label>
 
                         <input
                             id="edit-firstName"
-                            name="firstName"
                             type="text"
+                            name="firstName"
                             value={formData.firstName}
                             onChange={handleInputChange}
-                            required
                         />
+
+                        {errors.firstName && (
+                            <div className="field-error">
+                                {errors.firstName}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Last Name */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-lastName">
-                            Last Name *
+                            Last Name
                         </label>
 
                         <input
                             id="edit-lastName"
-                            name="lastName"
                             type="text"
+                            name="lastName"
                             value={formData.lastName}
                             onChange={handleInputChange}
-                            required
                         />
+
+                        {errors.lastName && (
+                            <div className="field-error">
+                                {errors.lastName}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Email */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-email">
-                            Email *
+                            Email Address
                         </label>
 
                         <input
                             id="edit-email"
+                            type="text"
                             name="email"
-                            type="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            required
                         />
+
+                        {errors.email && (
+                            <div className="field-error">
+                                {errors.email}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Phone */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-phone">
-                            Phone
+                            Phone Number
                         </label>
 
                         <input
                             id="edit-phone"
+                            type="text"
                             name="phone"
-                            type="tel"
                             value={formData.phone}
                             onChange={handleInputChange}
                         />
+
+                        {errors.phone && (
+                            <div className="field-error">
+                                {errors.phone}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Department */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-department">
                             Department
                         </label>
 
                         <input
                             id="edit-department"
-                            name="department"
                             type="text"
+                            name="department"
                             value={formData.department}
                             onChange={handleInputChange}
                         />
+
+                        {errors.department && (
+                            <div className="field-error">
+                                {errors.department}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Job Title */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-jobTitle">
                             Job Title
                         </label>
 
                         <input
                             id="edit-jobTitle"
-                            name="jobTitle"
                             type="text"
+                            name="jobTitle"
                             value={formData.jobTitle}
                             onChange={handleInputChange}
                         />
+
+                        {errors.jobTitle && (
+                            <div className="field-error">
+                                {errors.jobTitle}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Role */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-role">
                             Role
                         </label>
@@ -214,35 +477,59 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
                             value={formData.role}
                             onChange={handleInputChange}
                         >
-                            <option value="EMPLOYEE">
-                                Employee
+                            <option value="">
+                                Select Role
+                            </option>
+
+                            <option value="HR_ADMIN">
+                                HR Admin
                             </option>
 
                             <option value="MANAGER">
                                 Manager
                             </option>
 
-                            <option value="HR_ADMIN">
-                                HR Admin
+                            <option value="EMPLOYEE">
+                                Employee
                             </option>
                         </select>
+
+                        {errors.role && (
+                            <div className="field-error">
+                                {errors.role}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Joining Date */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-joiningDate">
                             Joining Date
                         </label>
 
                         <input
                             id="edit-joiningDate"
-                            name="joiningDate"
                             type="date"
+                            name="joiningDate"
                             value={formData.joiningDate}
                             onChange={handleInputChange}
                         />
+
+                        {errors.joiningDate && (
+                            <div className="field-error">
+                                {errors.joiningDate}
+                            </div>
+                        )}
+
                     </div>
 
+                    {/* Employment Status */}
+
                     <div className="edit-employee-field">
+
                         <label htmlFor="edit-employmentStatus">
                             Employment Status
                         </label>
@@ -253,6 +540,10 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
                             value={formData.employmentStatus}
                             onChange={handleInputChange}
                         >
+                            <option value="">
+                                Select Status
+                            </option>
+
                             <option value="ACTIVE">
                                 Active
                             </option>
@@ -260,11 +551,14 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
                             <option value="INACTIVE">
                                 Inactive
                             </option>
-
-                            <option value="ON_LEAVE">
-                                On Leave
-                            </option>
                         </select>
+
+                        {errors.employmentStatus && (
+                            <div className="field-error">
+                                {errors.employmentStatus}
+                            </div>
+                        )}
+
                     </div>
 
                 </div>
@@ -273,8 +567,18 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
 
                     <button
                         type="button"
+                        className="edit-employee-back"
+                        onClick={onClose}
+                        disabled={saving}
+                    >
+                        ← Back to Employees
+                    </button>
+
+                    <button
+                        type="button"
                         className="edit-employee-cancel"
                         onClick={onClose}
+                        disabled={saving}
                     >
                         Cancel
                     </button>
@@ -285,7 +589,7 @@ function EditEmployee({ employee, onClose, onEmployeeUpdated }) {
                         disabled={saving}
                     >
                         {saving
-                            ? 'Updating...'
+                            ? 'Saving...'
                             : 'Update Employee'}
                     </button>
 

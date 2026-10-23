@@ -1,3 +1,66 @@
+
+/* ========================================
+   ASura HR Management System - Employees
+   ======================================== */
+
+.employees-page {
+    display: flex;
+    min-height: 100vh;
+    background: #f5f7fb;
+    color: #1f2937;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.employees-main {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 28px 32px;
+}
+
+.employees-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.back-dashboard-button {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    background: #16a34a;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.back-dashboard-button:hover {
+    background: #15803d;
+}
+
+.add-employee-button {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 18px;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-employee-button:hover {
+    background: #1d4ed8;
+}
+
+/* Add Employee form */
+
+.employee-form-card,
 .edit-employee-card {
     background: white;
     border-radius: 12px;
@@ -6,6 +69,7 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
+.employee-form-header,
 .edit-employee-header {
     display: flex;
     justify-content: space-between;
@@ -13,17 +77,20 @@
     margin-bottom: 24px;
 }
 
+.employee-form-header h2,
 .edit-employee-header h2 {
     margin: 0;
     font-size: 20px;
 }
 
+.employee-form-header p,
 .edit-employee-header p {
     margin: 5px 0 0;
     color: #64748b;
     font-size: 14px;
 }
 
+.close-form-button,
 .edit-employee-close {
     border: none;
     background: transparent;
@@ -33,33 +100,29 @@
     line-height: 1;
 }
 
-.edit-employee-error {
-    background: #fef2f2;
-    color: #b91c1c;
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
-
+.form-grid,
 .edit-employee-form-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
 }
 
+.form-field,
 .edit-employee-field {
     display: flex;
     flex-direction: column;
     gap: 7px;
 }
 
+.form-field label,
 .edit-employee-field label {
     font-size: 13px;
     font-weight: 600;
     color: #374151;
 }
 
+.form-field input,
+.form-field select,
 .edit-employee-field input,
 .edit-employee-field select {
     width: 100%;
@@ -71,6 +134,8 @@
     background: white;
 }
 
+.form-field input:focus,
+.form-field select:focus,
 .edit-employee-field input:focus,
 .edit-employee-field select:focus {
     outline: none;
@@ -78,15 +143,27 @@
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
+.edit-employee-field-error {
+    color: #b91c1c;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 1px;
+}
+
+.employee-form-actions,
 .edit-employee-actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 25px;
 }
 
+.cancel-button,
+.save-employee-button,
 .edit-employee-cancel,
-.edit-employee-save {
+.edit-employee-save,
+.edit-employee-back {
     border: none;
     border-radius: 7px;
     padding: 10px 18px;
@@ -95,29 +172,282 @@
     cursor: pointer;
 }
 
+.cancel-button,
 .edit-employee-cancel {
-    background: #f1f5f9;
-    color: #475569;
+    background: #dc2626;
+    color: white;
 }
 
+.cancel-button:hover,
+.edit-employee-cancel:hover {
+    background: #b91c1c;
+}
+
+.save-employee-button,
 .edit-employee-save {
     background: #2563eb;
     color: white;
 }
 
-.edit-employee-save:disabled {
+.save-employee-button:hover,
+.edit-employee-save:hover {
+    background: #1d4ed8;
+}
+
+.edit-employee-back {
+    background: #16a34a;
+    color: white;
+}
+
+.edit-employee-back:hover {
+    background: #15803d;
+}
+
+.save-employee-button:disabled,
+.cancel-button:disabled,
+.edit-employee-save:disabled,
+.edit-employee-cancel:disabled,
+.edit-employee-back:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-@media (max-width: 1000px) {
+/* Errors */
+
+.employees-error,
+.edit-employee-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Employee directory */
+
+.employees-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.employees-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.employees-card-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.employee-search input {
+    width: 260px;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+.employee-search input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.employees-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.employees-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.employees-table th {
+    text-align: left;
+    padding: 13px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.employees-table td {
+    padding: 14px 13px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+
+.employee-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.employee-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.employee-info strong {
+    display: block;
+}
+
+.employee-info span {
+    display: block;
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.inactive {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.status-badge.on_leave {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.employee-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.edit-button,
+.delete-button {
+    border: none;
+    border-radius: 7px;
+    padding: 9px 13px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.edit-button {
+    background: #2563eb;
+    color: white;
+}
+
+.edit-button:hover {
+    background: #1d4ed8;
+}
+
+.delete-button {
+    background: #dc2626;
+    color: white;
+}
+
+.delete-button:hover {
+    background: #b91c1c;
+}
+
+.employees-message,
+.empty-employees {
+    padding: 30px;
+    text-align: center;
+    color: #64748b;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1100px) {
+    .form-grid,
     .edit-employee-form-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .employees-main {
+        padding: 24px;
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
+    .employees-page {
+        flex-direction: column;
+    }
+
+    .employees-main {
+        padding: 20px;
+    }
+
+    .employees-header-actions {
+        justify-content: flex-start;
+    }
+
+    .employees-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .employee-search,
+    .employee-search input {
+        width: 100%;
+    }
+
+    .form-grid,
     .edit-employee-form-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .employee-actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 450px) {
+    .employees-main {
+        padding: 15px;
+    }
+
+    .employees-card {
+        padding: 14px;
+    }
+
+    .employee-form-card,
+    .edit-employee-card {
+        padding: 16px;
+    }
+
+    .employees-header-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .employees-header-actions button {
+        width: 100%;
     }
 }

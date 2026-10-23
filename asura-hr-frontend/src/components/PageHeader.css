@@ -1,0 +1,101 @@
+
+/* ========================================
+   ASura HR Management System - Page Header
+   ======================================== */
+
+.page-header {
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0 0 22px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid #e5e7eb;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+.page-header-heading h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.page-header-heading p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.page-header-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.page-header-user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.page-header-user-name {
+    max-width: 220px;
+    overflow: hidden;
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.page-header-user-role {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.page-header-user-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+    .page-header {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .page-header-heading h1 {
+        font-size: 23px;
+    }
+
+    .page-header-user {
+        gap: 8px;
+    }
+
+    .page-header-user-details {
+        display: none;
+    }
+
+    .page-header-user-avatar {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+    }
+}

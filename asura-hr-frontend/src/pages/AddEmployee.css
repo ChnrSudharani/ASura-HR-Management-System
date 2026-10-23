@@ -96,8 +96,12 @@
 }
 
 .add-employee-cancel {
-    background: #f1f5f9;
-    color: #475569;
+    background: #dc2626;
+    color: white;
+}
+
+.add-employee-cancel:hover {
+    background: #b91c1c;
 }
 
 .add-employee-save {
@@ -105,7 +109,8 @@
     color: white;
 }
 
-.add-employee-save:disabled {
+.add-employee-save:disabled,
+.add-employee-cancel:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -121,9 +126,30 @@
         grid-template-columns: 1fr;
     }
 }
+
 .field-error {
     color: #dc2626;
     font-size: 12px;
     line-height: 1.4;
     margin-top: 2px;
+}
+
+.add-employee-back {
+    border: none;
+    border-radius: 7px;
+    padding: 10px 18px;
+    background: #16a34a;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-employee-back:hover {
+    background: #15803d;
+}
+
+.add-employee-back:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

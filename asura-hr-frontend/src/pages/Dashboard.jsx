@@ -1,97 +1,45 @@
-function Dashboard({ email, onLogout, onEmployeesClick }) {
+
+import Sidebar from '../components/Sidebar'
+import PageHeader from '../components/PageHeader'
+import './Dashboard.css'
+
+function Dashboard({
+                       email,
+                       onLogout,
+                       onEmployeesClick,
+                       onAttendanceClick,
+                       onLeaveClick,
+                   }) {
     return (
         <div className="dashboard-page">
-
-            <aside className="sidebar">
-                <div className="sidebar-brand">
-                    <div className="sidebar-logo">A</div>
-                    <div>
-                        <h1>ASura HR</h1>
-                        <span>HR Management</span>
-                    </div>
-                </div>
-
-                <nav className="sidebar-nav">
-                    <button className="nav-item active">
-                        <span>▦</span>
-                        Dashboard
-                    </button>
-
-                    <button
-                        className="nav-item"
-                        onClick={onEmployeesClick}
-                    >
-                        <span>♙</span>
-                        Employees
-                    </button>
-
-                    <button className="nav-item">
-                        <span>▤</span>
-                        Departments
-                    </button>
-
-                    <button className="nav-item">
-                        <span>◷</span>
-                        Leave Management
-                    </button>
-
-                    <button className="nav-item">
-                        <span>✓</span>
-                        Attendance
-                    </button>
-
-                    <button className="nav-item">
-                        <span>▥</span>
-                        Reports
-                    </button>
-                </nav>
-
-                <div className="sidebar-bottom">
-                    <button className="nav-item">
-                        <span>⚙</span>
-                        Settings
-                    </button>
-
-                    <button className="nav-item logout-item" onClick={onLogout}>
-                        <span>↪</span>
-                        Sign out
-                    </button>
-                </div>
-            </aside>
+            <Sidebar
+                activePage="dashboard"
+                onDashboardClick={() => {}}
+                onEmployeesClick={onEmployeesClick}
+                onAttendanceClick={onAttendanceClick}
+                onLeaveClick={onLeaveClick}
+                onLogout={onLogout}
+            />
 
             <main className="dashboard-main">
-
-                <header className="dashboard-header">
-                    <div>
-                        <h2>Dashboard</h2>
-                        <p>Welcome back to ASura HR</p>
-                    </div>
-
-                    <div className="user-profile">
-                        <div className="user-avatar">
-                            {email.charAt(0).toUpperCase()}
-                        </div>
-
-                        <div>
-                            <strong>HR Administrator</strong>
-                            <span>{email}</span>
-                        </div>
-                    </div>
-                </header>
+                <PageHeader
+                    title="Dashboard"
+                    subtitle="Welcome back to ASura HR"
+                    email={email}
+                />
 
                 <section className="dashboard-content">
-
                     <div className="welcome-card">
                         <div>
                             <h3>Good morning! 👋</h3>
                             <p>
-                                Here's what's happening across your organisation today.
+                                Here's what's happening across your
+                                organisation today.
                             </p>
                         </div>
                     </div>
 
                     <div className="stats-grid">
-
                         <div className="stat-card">
                             <div className="stat-icon">♙</div>
                             <div>
@@ -127,11 +75,9 @@ function Dashboard({ email, onLogout, onEmployeesClick }) {
                                 <small>Across organisation</small>
                             </div>
                         </div>
-
                     </div>
 
                     <div className="dashboard-grid">
-
                         <div className="dashboard-panel">
                             <div className="panel-header">
                                 <div>
@@ -139,40 +85,51 @@ function Dashboard({ email, onLogout, onEmployeesClick }) {
                                     <p>Latest employee requests</p>
                                 </div>
 
-                                <button>View all</button>
+                                <button
+                                    type="button"
+                                    onClick={onLeaveClick}
+                                >
+                                    View all
+                                </button>
                             </div>
 
                             <div className="leave-row">
                                 <div className="employee-avatar">JD</div>
-
                                 <div className="leave-details">
                                     <strong>John Davis</strong>
-                                    <span>Annual Leave · 12 Sep - 16 Sep</span>
+                                    <span>
+                                        Annual Leave · 12 Sep - 16 Sep
+                                    </span>
                                 </div>
-
-                                <span className="status pending">Pending</span>
+                                <span className="status pending">
+                                    Pending
+                                </span>
                             </div>
 
                             <div className="leave-row">
                                 <div className="employee-avatar">SK</div>
-
                                 <div className="leave-details">
                                     <strong>Sarah Khan</strong>
-                                    <span>Sick Leave · 10 Sep - 11 Sep</span>
+                                    <span>
+                                        Sick Leave · 10 Sep - 11 Sep
+                                    </span>
                                 </div>
-
-                                <span className="status approved">Approved</span>
+                                <span className="status approved">
+                                    Approved
+                                </span>
                             </div>
 
                             <div className="leave-row">
                                 <div className="employee-avatar">RM</div>
-
                                 <div className="leave-details">
                                     <strong>Robert Miller</strong>
-                                    <span>Annual Leave · 18 Sep - 20 Sep</span>
+                                    <span>
+                                        Annual Leave · 18 Sep - 20 Sep
+                                    </span>
                                 </div>
-
-                                <span className="status pending">Pending</span>
+                                <span className="status pending">
+                                    Pending
+                                </span>
                             </div>
                         </div>
 
@@ -184,15 +141,25 @@ function Dashboard({ email, onLogout, onEmployeesClick }) {
                                 </div>
                             </div>
 
-                            <button className="quick-action">
+                            <button
+                                type="button"
+                                className="quick-action"
+                                onClick={onEmployeesClick}
+                            >
                                 <span>＋</span>
                                 <div>
                                     <strong>Add Employee</strong>
-                                    <small>Create a new employee record</small>
+                                    <small>
+                                        Create a new employee record
+                                    </small>
                                 </div>
                             </button>
 
-                            <button className="quick-action">
+                            <button
+                                type="button"
+                                className="quick-action"
+                                onClick={onLeaveClick}
+                            >
                                 <span>◷</span>
                                 <div>
                                     <strong>Review Leave</strong>
@@ -200,17 +167,20 @@ function Dashboard({ email, onLogout, onEmployeesClick }) {
                                 </div>
                             </button>
 
-                            <button className="quick-action">
+                            <button
+                                type="button"
+                                className="quick-action"
+                            >
                                 <span>▥</span>
                                 <div>
                                     <strong>View Reports</strong>
-                                    <small>Access HR reports and analytics</small>
+                                    <small>
+                                        Access HR reports and analytics
+                                    </small>
                                 </div>
                             </button>
                         </div>
-
                     </div>
-
                 </section>
             </main>
         </div>

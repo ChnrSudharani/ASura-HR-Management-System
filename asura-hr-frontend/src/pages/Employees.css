@@ -1,11 +1,35 @@
+
+/* ========================================
+   ASura HR Management System - Employees
+   ======================================== */
+
+/* Main page layout */
+
 .employees-page {
-    padding: 30px;
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-x: clip;
 }
+
+.employees-main {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+    max-width: 100%;
+    padding: 28px 30px 40px;
+    box-sizing: border-box;
+}
+
+/* Employees header */
 
 .employees-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-bottom: 25px;
 }
 
@@ -17,6 +41,31 @@
 .employees-header p {
     margin: 6px 0 0;
     color: #6b7280;
+}
+
+/* Header action buttons */
+
+.employees-header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 0;
+}
+
+.back-dashboard-button {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    background: #16a34a;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.back-dashboard-button:hover {
+    background: #15803d;
 }
 
 .add-employee-button {
@@ -34,7 +83,12 @@
     opacity: 0.9;
 }
 
+/* Add / Edit employee form */
+
 .employee-form-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     background: white;
     border-radius: 12px;
     padding: 24px;
@@ -46,6 +100,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 12px;
     margin-bottom: 24px;
 }
 
@@ -61,6 +116,7 @@
 }
 
 .close-form-button {
+    flex-shrink: 0;
     border: none;
     background: transparent;
     font-size: 28px;
@@ -71,13 +127,14 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
 }
 
 .form-field {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: 7px;
 }
 
@@ -90,6 +147,7 @@
 .form-field input,
 .form-field select {
     width: 100%;
+    min-width: 0;
     box-sizing: border-box;
     padding: 10px 12px;
     border: 1px solid #d1d5db;
@@ -108,6 +166,7 @@
 .employee-form-actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 25px;
 }
@@ -123,8 +182,12 @@
 }
 
 .cancel-button {
-    background: #f1f5f9;
-    color: #475569;
+    background: #dc2626;
+    color: white;
+}
+
+.cancel-button:hover {
+    background: #b91c1c;
 }
 
 .save-employee-button {
@@ -132,21 +195,37 @@
     color: white;
 }
 
-.save-employee-button:disabled {
+.save-employee-button:hover {
+    background: #1d4ed8;
+}
+
+.save-employee-button:disabled,
+.cancel-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
+/* Error message */
+
 .employees-error {
+    width: 100%;
+    box-sizing: border-box;
     background: #fef2f2;
     color: #b91c1c;
     padding: 12px 15px;
     border-radius: 8px;
     margin-bottom: 20px;
     font-size: 14px;
+    overflow-wrap: anywhere;
 }
 
+/* Employee directory card */
+
 .employees-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     background: white;
     border-radius: 12px;
     padding: 20px;
@@ -157,6 +236,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+    min-width: 0;
     margin-bottom: 20px;
 }
 
@@ -165,47 +246,98 @@
     font-size: 20px;
 }
 
+/* Employee search */
+
+.employee-search {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .employee-search input {
     width: 260px;
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 10px 12px;
     border: 1px solid #d1d5db;
     border-radius: 7px;
     font-size: 14px;
 }
 
+/* Employee table - fits within the page */
+
 .employees-table-wrapper {
+    display: block;
     width: 100%;
-    overflow-x: auto;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .employees-table {
     width: 100%;
+    min-width: 0;
     border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Column widths total 100% */
+
+.employee-column {
+    width: 38%;
+}
+
+.job-title-column {
+    width: 15%;
+}
+
+.role-column {
+    width: 10%;
+}
+
+.status-column {
+    width: 12%;
+}
+
+.joining-date-column {
+    width: 13%;
+}
+
+.actions-column {
+    width: 12%;
 }
 
 .employees-table th {
     text-align: left;
-    padding: 13px;
+    padding: 12px 8px;
     background: #f8fafc;
     color: #475569;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 600;
+    vertical-align: middle;
+    overflow-wrap: normal;
 }
 
 .employees-table td {
-    padding: 14px 13px;
+    padding: 12px 8px;
     border-bottom: 1px solid #e5e7eb;
-    font-size: 14px;
+    font-size: 13px;
+    vertical-align: middle;
+    overflow-wrap: normal;
 }
+
+/* Employee name, avatar and email */
 
 .employee-info {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
 }
 
 .employee-avatar {
     width: 38px;
     height: 38px;
+    flex-shrink: 0;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -214,26 +346,45 @@
     color: #3730a3;
     font-size: 13px;
     font-weight: 700;
-    flex-shrink: 0;
+}
+
+.employee-details {
+    flex: 1;
+    min-width: 0;
 }
 
 .employee-info strong {
     display: block;
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 600;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
 }
 
 .employee-info span {
     display: block;
-    margin-top: 3px;
+    margin-top: 4px;
     color: #64748b;
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
 }
+
+/* Employment status badges */
 
 .status-badge {
     display: inline-block;
-    padding: 5px 9px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 5px 8px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+    white-space: normal;
 }
 
 .status-badge.active {
@@ -251,46 +402,113 @@
     color: #92400e;
 }
 
+/* Edit and Delete actions */
+
 .employee-actions {
     display: flex;
-    gap: 7px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .edit-button,
 .delete-button {
     border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
+    border-radius: 7px;
+    padding: 7px 9px;
     font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
 }
 
 .edit-button {
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: #2563eb;
+    color: white;
+}
+
+.edit-button:hover {
+    background: #1d4ed8;
 }
 
 .delete-button {
-    background: #fef2f2;
-    color: #dc2626;
+    background: #dc2626;
+    color: white;
 }
+
+.delete-button:hover {
+    background: #b91c1c;
+}
+
+/* Loading, empty and informational messages */
 
 .employees-message,
 .empty-employees {
     padding: 30px;
     text-align: center;
     color: #64748b;
+    overflow-wrap: anywhere;
 }
 
+/* Medium screens */
+
 @media (max-width: 1000px) {
+    .employees-main {
+        padding: 24px 20px 32px;
+    }
+
     .form-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .employees-card {
+        padding: 16px;
+    }
+
+    .employees-table th {
+        padding: 10px 6px;
+        font-size: 11px;
+    }
+
+    .employees-table td {
+        padding: 10px 6px;
+        font-size: 12px;
+    }
+
+    .employee-info {
+        gap: 7px;
+    }
+
+    .employee-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 11px;
+    }
+
+    .employee-info strong {
+        font-size: 12px;
+    }
+
+    .employee-info span {
+        font-size: 10px;
+    }
+
+    .status-badge {
+        padding: 4px 6px;
+        font-size: 11px;
+    }
+
+    .edit-button,
+    .delete-button {
+        padding: 6px 7px;
+        font-size: 11px;
     }
 }
 
+/* Small screens */
+
 @media (max-width: 700px) {
-    .employees-page {
-        padding: 20px;
+    .employees-main {
+        padding: 20px 14px 28px;
     }
 
     .employees-header {
@@ -299,10 +517,19 @@
         gap: 15px;
     }
 
+    .employees-header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
     .employees-card-header {
         align-items: flex-start;
         flex-direction: column;
         gap: 15px;
+    }
+
+    .employee-search {
+        width: 100%;
     }
 
     .employee-search input {
@@ -310,6 +537,81 @@
     }
 
     .form-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .employee-form-card {
+        padding: 18px;
+    }
+
+    .employees-card {
+        padding: 12px;
+    }
+
+    .employees-table th {
+        padding: 8px 4px;
+        font-size: 10px;
+    }
+
+    .employees-table td {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+
+    .employee-info {
+        gap: 5px;
+    }
+
+    .employee-avatar {
+        width: 26px;
+        height: 26px;
+        font-size: 10px;
+    }
+
+    .employee-info strong {
+        font-size: 11px;
+    }
+
+    .employee-info span {
+        font-size: 10px;
+    }
+
+    .status-badge {
+        padding: 4px 5px;
+        font-size: 10px;
+    }
+
+    .employee-actions {
+        gap: 4px;
+    }
+
+    .edit-button,
+    .delete-button {
+        padding: 5px 6px;
+        font-size: 10px;
+    }
+
+    .employee-form-actions {
+        justify-content: flex-start;
+
+    }
+
+    .employees-table thead th:first-child {
+        text-align: left !important;
+        padding-left: 68px !important;
+    }
+
+    .employees-table tbody td:first-child {
+        text-align: left;
+    }
+
+    .employee-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .employee-details {
+        text-align: left;
     }
 }

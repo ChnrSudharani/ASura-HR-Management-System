@@ -43,69 +43,108 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
         const jobTitle = formData.jobTitle.trim()
         const role = formData.role.trim()
         const joiningDate = formData.joiningDate.trim()
-        const employmentStatus = formData.employmentStatus.trim()
+        const employmentStatus =
+            formData.employmentStatus.trim()
 
-        const namePattern = /^[A-Za-zÀ-ÿ]+(?:[ '-][A-Za-zÀ-ÿ]+)*$/
-        const emailPattern = /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/
-        const phonePattern = /^\+?[0-9][0-9\s()-]*$/
-        const jobTitlePattern = /^(?=.*[A-Za-zÀ-ÿ])[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 '&/().,-]*$/
+        const namePattern =
+            /^[A-Za-zÀ-ÿ]+(?:[ '-][A-Za-zÀ-ÿ]+)*$/
 
+        const emailPattern =
+            /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/
+
+        const phonePattern =
+            /^\+?[0-9][0-9\s()-]*$/
+
+        const jobTitlePattern =
+            /^(?=.*[A-Za-zÀ-ÿ])[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 '&/().,-]*$/
+
+        // First Name
         if (!firstName) {
-            newErrors.firstName = 'First name is required.'
+            newErrors.firstName =
+                'First name is required.'
         } else if (!namePattern.test(firstName)) {
-            newErrors.firstName = 'First name can contain only letters, spaces, hyphens or apostrophes.'
+            newErrors.firstName =
+                'First name can contain only letters, spaces, hyphens or apostrophes.'
         }
 
+        // Last Name
         if (!lastName) {
-            newErrors.lastName = 'Last name is required.'
+            newErrors.lastName =
+                'Last name is required.'
         } else if (!namePattern.test(lastName)) {
-            newErrors.lastName = 'Last name can contain only letters, spaces, hyphens or apostrophes.'
+            newErrors.lastName =
+                'Last name can contain only letters, spaces, hyphens or apostrophes.'
         }
 
+        // Email
         if (!email) {
-            newErrors.email = 'Email address is required.'
+            newErrors.email =
+                'Email address is required.'
         } else if (/\s/.test(email)) {
-            newErrors.email = 'Email address must not contain spaces.'
+            newErrors.email =
+                'Email address must not contain spaces.'
         } else if (!emailPattern.test(email)) {
-            newErrors.email = 'Please enter a valid email address, for example name@example.com.'
+            newErrors.email =
+                'Please enter a valid email address, for example name@example.com.'
         }
 
+        // Phone
         if (!phone) {
-            newErrors.phone = 'Phone number is required.'
+            newErrors.phone =
+                'Phone number is required.'
         } else if (!phonePattern.test(phone)) {
-            newErrors.phone = 'Phone number can contain only numbers, spaces, +, hyphens and brackets.'
+            newErrors.phone =
+                'Phone number can contain only numbers, spaces, +, hyphens and brackets.'
         } else {
-            const digitsOnly = phone.replace(/\D/g, '')
+            const digitsOnly =
+                phone.replace(/\D/g, '')
 
-            if (digitsOnly.length < 9 || digitsOnly.length > 15) {
-                newErrors.phone = 'Phone number must contain between 9 and 15 digits.'
+            if (
+                digitsOnly.length < 9 ||
+                digitsOnly.length > 15
+            ) {
+                newErrors.phone =
+                    'Phone number must contain between 9 and 15 digits.'
             } else if (/^(\d)\1+$/.test(digitsOnly)) {
-                newErrors.phone = 'Please enter a valid phone number.'
+                newErrors.phone =
+                    'Please enter a valid phone number.'
             } else if (digitsOnly === '1234567890') {
-                newErrors.phone = 'Please enter a valid phone number.'
+                newErrors.phone =
+                    'Please enter a valid phone number.'
             }
         }
 
+        // Department
         if (!department) {
-            newErrors.department = 'Department is required.'
+            newErrors.department =
+                'Department is required.'
         }
 
+        // Job Title
         if (!jobTitle) {
-            newErrors.jobTitle = 'Job title is required.'
+            newErrors.jobTitle =
+                'Job title is required.'
         } else if (!jobTitlePattern.test(jobTitle)) {
-            newErrors.jobTitle = 'Please enter a valid job title.'
+            newErrors.jobTitle =
+                'Please enter a valid job title.'
         }
 
+        // Role
         if (!role) {
-            newErrors.role = 'Please select an employee role.'
+            newErrors.role =
+                'Please select an employee role.'
         }
 
+        // Joining Date
         if (!joiningDate) {
-            newErrors.joiningDate = 'Joining date is required.'
+            newErrors.joiningDate =
+                'Joining date is required.'
         }
 
+        // Employment Status
         if (!employmentStatus) {
-            newErrors.employmentStatus = 'Please select an employment status.'
+            newErrors.employmentStatus =
+                'Please select an employment status.'
         }
 
         setErrors(newErrors)
@@ -125,7 +164,8 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
         try {
             setSaving(true)
 
-            const token = localStorage.getItem('token')
+            const token =
+                localStorage.getItem('token')
 
             const cleanedData = {
                 firstName: formData.firstName.trim(),
@@ -136,7 +176,8 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                 jobTitle: formData.jobTitle.trim(),
                 role: formData.role.trim(),
                 joiningDate: formData.joiningDate,
-                employmentStatus: formData.employmentStatus.trim()
+                employmentStatus:
+                    formData.employmentStatus.trim()
             }
 
             const response = await fetch(
@@ -152,15 +193,21 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
             )
 
             if (!response.ok) {
-                const message = await response.text()
+                const message =
+                    await response.text()
 
                 if (
-                    message.toLowerCase().includes('email address already exists') ||
-                    message.toLowerCase().includes('email already exists')
+                    message.toLowerCase().includes(
+                        'email address already exists'
+                    ) ||
+                    message.toLowerCase().includes(
+                        'email already exists'
+                    )
                 ) {
                     setErrors((currentErrors) => ({
                         ...currentErrors,
-                        email: 'Email address already exists. Please use a different email address.',
+                        email:
+                            'Email address already exists. Please use a different email address.',
                         form: ''
                     }))
 
@@ -168,8 +215,12 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                 }
 
                 if (
-                    message.toLowerCase().includes('phone number') ||
-                    message.toLowerCase().includes('valid phone number')
+                    message.toLowerCase().includes(
+                        'phone number'
+                    ) ||
+                    message.toLowerCase().includes(
+                        'valid phone number'
+                    )
                 ) {
                     setErrors((currentErrors) => ({
                         ...currentErrors,
@@ -181,7 +232,9 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                 }
 
                 if (
-                    message.toLowerCase().includes('job title')
+                    message.toLowerCase().includes(
+                        'job title'
+                    )
                 ) {
                     setErrors((currentErrors) => ({
                         ...currentErrors,
@@ -193,11 +246,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                 }
 
                 throw new Error(
-                    message || 'Unable to create employee.'
+                    message ||
+                    'Unable to create employee.'
                 )
             }
 
-            const newEmployee = await response.json()
+            const newEmployee =
+                await response.json()
 
             onEmployeeAdded(newEmployee)
             onClose()
@@ -216,9 +271,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
         <div className="add-employee-card">
 
             <div className="add-employee-header">
+
                 <div>
                     <h2>Add Employee</h2>
-                    <p>Enter the employee details below.</p>
+
+                    <p>
+                        Enter the employee details below.
+                    </p>
                 </div>
 
                 <button
@@ -229,6 +288,7 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                 >
                     ×
                 </button>
+
             </div>
 
             {errors.form && (
@@ -241,7 +301,10 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
 
                 <div className="add-employee-form-grid">
 
+                    {/* First Name */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="firstName">
                             First Name
                         </label>
@@ -259,9 +322,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.firstName}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Last Name */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="lastName">
                             Last Name
                         </label>
@@ -279,9 +346,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.lastName}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Email */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="email">
                             Email Address
                         </label>
@@ -299,9 +370,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.email}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Phone */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="phone">
                             Phone Number
                         </label>
@@ -319,9 +394,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.phone}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Department */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="department">
                             Department
                         </label>
@@ -339,9 +418,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.department}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Job Title */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="jobTitle">
                             Job Title
                         </label>
@@ -359,9 +442,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.jobTitle}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Role */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="role">
                             Role
                         </label>
@@ -394,9 +481,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.role}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Joining Date */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="joiningDate">
                             Joining Date
                         </label>
@@ -414,9 +505,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.joiningDate}
                             </div>
                         )}
+
                     </div>
 
+                    {/* Employment Status */}
+
                     <div className="add-employee-field">
+
                         <label htmlFor="employmentStatus">
                             Employment Status
                         </label>
@@ -445,11 +540,21 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                                 {errors.employmentStatus}
                             </div>
                         )}
+
                     </div>
 
                 </div>
 
                 <div className="add-employee-actions">
+
+                    <button
+                        type="button"
+                        className="add-employee-back"
+                        onClick={onClose}
+                        disabled={saving}
+                    >
+                        ← Back to Employees
+                    </button>
 
                     <button
                         type="button"
@@ -465,7 +570,9 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                         className="add-employee-save"
                         disabled={saving}
                     >
-                        {saving ? 'Saving...' : 'Add Employee'}
+                        {saving
+                            ? 'Saving...'
+                            : 'Add Employee'}
                     </button>
 
                 </div>

@@ -1,41 +1,136 @@
+
 import { useState } from 'react'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
+import Attendance from './pages/Attendance'
+import LeaveManagement from './pages/LeaveManagement'
+import NavigationContext from './components/NavigationContext'
+
+function getSavedSession() {
+    const storages = [localStorage, sessionStorage]
+
+    for (const storage of storages) {
+        try {
+            const token = storage.getItem('token')
+            const savedUser = storage.getItem('user')
+
+            if (!token || !savedUser) {
+                continue
+            }
+
+            const user = JSON.parse(savedUser)
+
+            if (user.email && user.role) {
+                return {
+                    email: user.email,
+                    role: user.role
+                }
+            }
+        } catch {
+            // Ignore invalid saved session data and try the next storage.
+        }
+    }
+
+    return null
+}
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false)
-    const [userEmail, setUserEmail] = useState('')
+    const [savedSession] = useState(() => getSavedSession())
+    const [isLoggedIn, setIsLoggedIn] = useState(Boolean(savedSession))
+    const [userEmail, setUserEmail] = useState(savedSession?.email || '')
+    const [userRole, setUserRole] = useState(savedSession?.role || 'EMPLOYEE')
     const [currentPage, setCurrentPage] = useState('dashboard')
 
     const handleLogin = (email) => {
+        let role = 'EMPLOYEE'
+
+        try {
+            const user =
+                JSON.parse(
+                    localStorage.getItem('user') ||
+                    sessionStorage.getItem('user') ||
+                    '{}'
+                )
+
+            role = user.role || 'EMPLOYEE'
+            email = user.email || email
+        } catch {
+            // Keep the fallback role if saved user data is invalid.
+        }
+
         setUserEmail(email)
+        setUserRole(role)
         setIsLoggedIn(true)
         setCurrentPage('dashboard')
     }
 
     const handleLogout = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('user')
+
         setUserEmail('')
+        setUserRole('EMPLOYEE')
         setIsLoggedIn(false)
         setCurrentPage('dashboard')
     }
+
+    const goToDashboard = () => setCurrentPage('dashboard')
+    const goToEmployees = () => setCurrentPage('employees')
+    const goToAttendance = () => setCurrentPage('attendance')
+    const goToLeave = () => setCurrentPage('leave')
 
     if (!isLoggedIn) {
         return <Login onLogin={handleLogin} />
     }
 
-    if (currentPage === 'employees') {
-        return (
-            <Employees />
-        )
-    }
-
     return (
-        <Dashboard
-            email={userEmail}
-            onLogout={handleLogout}
-            onEmployeesClick={() => setCurrentPage('employees')}
-        />
+        <NavigationContext.Provider
+            value={{
+                onDashboardClick: goToDashboard,
+                onEmployeesClick: goToEmployees,
+                onAttendanceClick: goToAttendance,
+                onLeaveClick: goToLeave
+            }}
+        >
+            {currentPage === 'employees' ? (
+                <Employees
+                    email={userEmail}
+                    onDashboardClick={goToDashboard}
+                    onLogout={handleLogout}
+                    onAttendanceClick={goToAttendance}
+                    onLeaveClick={goToLeave}
+                />
+            ) : currentPage === 'attendance' ? (
+                <Attendance
+                    email={userEmail}
+                    onDashboardClick={goToDashboard}
+                    onEmployeesClick={goToEmployees}
+                    onLogout={handleLogout}
+                    onLeaveClick={goToLeave}
+                />
+            ) : currentPage === 'leave' ? (
+                <LeaveManagement
+                    email={userEmail}
+                    role={userRole}
+                    onDashboardClick={goToDashboard}
+                    onEmployeesClick={goToEmployees}
+                    onAttendanceClick={goToAttendance}
+                    onLeaveClick={goToLeave}
+                    onLogout={handleLogout}
+                />
+            ) : (
+                <Dashboard
+                    email={userEmail}
+                    onLogout={handleLogout}
+                    onEmployeesClick={goToEmployees}
+                    onAttendanceClick={goToAttendance}
+                    onLeaveClick={goToLeave}
+                />
+            )}
+        </NavigationContext.Provider>
     )
 }
 

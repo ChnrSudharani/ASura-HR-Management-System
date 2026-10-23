@@ -1,12 +1,20 @@
 
 import { useEffect, useState } from 'react'
 import './Employees.css'
+
+import Sidebar from '../components/Sidebar'
+import PageHeader from '../components/PageHeader'
+
 import AddEmployee from './AddEmployee'
 import EditEmployee from './EditEmployee'
 import DeleteEmployee from './DeleteEmployee'
 
-function Employees() {
-
+function Employees({
+                       email = '',
+                       onDashboardClick,
+                       onLogout,
+                       onAttendanceClick,
+                   }) {
     const [employees, setEmployees] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -16,7 +24,6 @@ function Employees() {
     const [deletingEmployee, setDeletingEmployee] = useState(null)
 
     const fetchEmployees = async () => {
-
         try {
             setLoading(true)
             setError('')
@@ -28,8 +35,8 @@ function Employees() {
                 {
                     method: 'GET',
                     headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
             )
 
@@ -38,17 +45,11 @@ function Employees() {
             }
 
             const data = await response.json()
-
             setEmployees(data)
-
         } catch (err) {
-
             setError(err.message)
-
         } finally {
-
             setLoading(false)
-
         }
     }
 
@@ -57,8 +58,7 @@ function Employees() {
     }, [])
 
     const filteredEmployees = employees.filter((employee) => {
-
-        const search = searchTerm.toLowerCase()
+        const search = searchTerm.trim().toLowerCase()
 
         return (
             employee.firstName?.toLowerCase().includes(search) ||
@@ -71,269 +71,231 @@ function Employees() {
         )
     })
 
+    const isFormOpen =
+        showForm || editingEmployee !== null || deletingEmployee !== null
+
     return (
         <div className="employees-page">
+            <Sidebar
+                activePage="employees"
+                onDashboardClick={onDashboardClick}
+                onEmployeesClick={() => {}}
+                onAttendanceClick={onAttendanceClick}
+                onLogout={onLogout}
+            />
 
-            <div className="employees-header">
-
-                <div>
-                    <h1>Employees</h1>
-
-                    <p>
-                        Manage your organisation's employees
-                    </p>
-                </div>
-
-                <button
-                    className="add-employee-button"
-                    onClick={() => {
-                        setShowForm(true)
-                        setError('')
-                    }}
-                >
-                    + Add Employee
-                </button>
-
-            </div>
-
-            {error && (
-                <div className="employees-error">
-                    {error}
-                </div>
-            )}
-
-            {showForm && (
-                <AddEmployee
-                    onClose={() => setShowForm(false)}
-                    onEmployeeAdded={(newEmployee) => {
-
-                        setEmployees((currentEmployees) => [
-                            ...currentEmployees,
-                            newEmployee
-                        ])
-
-                        setShowForm(false)
-                    }}
+            <main className="employees-main">
+                <PageHeader
+                    title="Employees"
+                    subtitle="Manage your organisation's employees"
+                    email={email}
                 />
-            )}
 
-            {editingEmployee && (
-                <EditEmployee
-                    employee={editingEmployee}
-                    onClose={() => setEditingEmployee(null)}
-                    onEmployeeUpdated={(updatedEmployee) => {
-
-                        setEmployees((currentEmployees) =>
-                            currentEmployees.map((employee) =>
-                                employee.id === updatedEmployee.id
-                                    ? updatedEmployee
-                                    : employee
-                            )
-                        )
-
-                        setEditingEmployee(null)
-                    }}
-                />
-            )}
-
-            {deletingEmployee && (
-                <DeleteEmployee
-                    employee={deletingEmployee}
-                    onClose={() => setDeletingEmployee(null)}
-                    onEmployeeDeleted={(deletedEmployeeId) => {
-
-                        setEmployees((currentEmployees) =>
-                            currentEmployees.filter(
-                                (employee) =>
-                                    employee.id !== deletedEmployeeId
-                            )
-                        )
-
-                        setDeletingEmployee(null)
-                    }}
-                />
-            )}
-
-            <div className="employees-card">
-
-                <div className="employees-card-header">
-
-                    <h2>Employee Directory</h2>
-
-                    <div className="employee-search">
-
-                        <input
-                            type="text"
-                            placeholder="Search employees..."
-                            value={searchTerm}
-                            onChange={(event) =>
-                                setSearchTerm(event.target.value)
-                            }
-                        />
-
-                    </div>
-
-                </div>
-
-                {loading && (
-                    <div className="employees-message">
-                        Loading employees...
+                {!isFormOpen && (
+                    <div className="employees-header-actions">
+                        <button
+                            type="button"
+                            className="add-employee-button"
+                            onClick={() => {
+                                setShowForm(true)
+                                setError('')
+                            }}
+                        >
+                            + Add Employee
+                        </button>
                     </div>
                 )}
 
-                {!loading && !error && (
+                {error && !isFormOpen && (
+                    <div className="employees-error">
+                        {error}
+                    </div>
+                )}
 
-                    <div className="employees-table-wrapper">
+                {showForm && (
+                    <AddEmployee
+                        onClose={() => setShowForm(false)}
+                        onEmployeeAdded={(newEmployee) => {
+                            setEmployees((currentEmployees) => [
+                                ...currentEmployees,
+                                newEmployee,
+                            ])
+                            setShowForm(false)
+                        }}
+                    />
+                )}
 
-                        <table className="employees-table">
+                {editingEmployee && (
+                    <EditEmployee
+                        employee={editingEmployee}
+                        onClose={() => setEditingEmployee(null)}
+                        onEmployeeUpdated={(updatedEmployee) => {
+                            setEmployees((currentEmployees) =>
+                                currentEmployees.map((employee) =>
+                                    employee.id === updatedEmployee.id
+                                        ? updatedEmployee
+                                        : employee
+                                )
+                            )
+                            setEditingEmployee(null)
+                        }}
+                    />
+                )}
 
-                            <thead>
+                {deletingEmployee && (
+                    <DeleteEmployee
+                        employee={deletingEmployee}
+                        onClose={() => setDeletingEmployee(null)}
+                        onEmployeeDeleted={(deletedEmployeeId) => {
+                            setEmployees((currentEmployees) =>
+                                currentEmployees.filter(
+                                    (employee) =>
+                                        employee.id !== deletedEmployeeId
+                                )
+                            )
+                            setDeletingEmployee(null)
+                        }}
+                    />
+                )}
 
-                                <tr>
-                                    <th>Employee</th>
-                                    <th>Department</th>
-                                    <th>Job Title</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Joining Date</th>
-                                    <th>Actions</th>
-                                </tr>
+                {!isFormOpen && (
+                    <div className="employees-card">
+                        <div className="employees-card-header">
+                            <h2>Employee Directory</h2>
 
-                            </thead>
+                            <div className="employee-search">
+                                <input
+                                    type="text"
+                                    placeholder="Search employees..."
+                                    value={searchTerm}
+                                    onChange={(event) =>
+                                        setSearchTerm(event.target.value)
+                                    }
+                                    aria-label="Search employees"
+                                />
+                            </div>
+                        </div>
 
-                            <tbody>
+                        {loading && (
+                            <div className="employees-message">
+                                Loading employees...
+                            </div>
+                        )}
 
-                                {filteredEmployees.length === 0 ? (
+                        {!loading && !error && (
+                            <div className="employees-table-wrapper">
+                                <table className="employees-table">
+                                    <colgroup>
+                                        <col className="employee-column" />
+                                        <col className="job-title-column" />
+                                        <col className="role-column" />
+                                        <col className="status-column" />
+                                        <col className="joining-date-column" />
+                                        <col className="actions-column" />
+                                    </colgroup>
 
+                                    <thead>
                                     <tr>
-
-                                        <td
-                                            colSpan="7"
-                                            className="empty-employees"
-                                        >
-                                            {employees.length === 0
-                                                ? 'No employees found'
-                                                : 'No employees match your search'
-                                            }
-                                        </td>
-
+                                        <th>Employee</th>
+                                        <th>Job Title</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Joining Date</th>
+                                        <th>Actions</th>
                                     </tr>
+                                    </thead>
 
-                                ) : (
-
-                                    filteredEmployees.map((employee) => (
-
-                                        <tr key={employee.id}>
-
-                                            <td>
-
-                                                <div className="employee-info">
-
-                                                    <div className="employee-avatar">
-
-                                                        {employee.firstName
-                                                            ?.charAt(0)
-                                                            .toUpperCase()}
-
-                                                        {employee.lastName
-                                                            ?.charAt(0)
-                                                            .toUpperCase()}
-
-                                                    </div>
-
-                                                    <div>
-
-                                                        <strong>
-                                                            {employee.firstName}{' '}
-                                                            {employee.lastName}
-                                                        </strong>
-
-                                                        <span>
-                                                            {employee.email}
-                                                        </span>
-
-                                                    </div>
-
-                                                </div>
-
+                                    <tbody>
+                                    {filteredEmployees.length === 0 ? (
+                                        <tr>
+                                            <td
+                                                colSpan={6}
+                                                className="empty-employees"
+                                            >
+                                                {employees.length === 0
+                                                    ? 'No employees found'
+                                                    : 'No employees match your search'}
                                             </td>
-
-                                            <td>
-                                                {employee.department || '-'}
-                                            </td>
-
-                                            <td>
-                                                {employee.jobTitle || '-'}
-                                            </td>
-
-                                            <td>
-                                                {employee.role || '-'}
-                                            </td>
-
-                                            <td>
-
-                                                <span
-                                                    className={`status-badge ${
-    employee.employmentStatus
-        ?.toLowerCase()
-}`}
-                                                >
-                                                    {employee.employmentStatus || '-'}
-                                                </span>
-
-                                            </td>
-
-                                            <td>
-                                                {employee.joiningDate || '-'}
-                                            </td>
-
-                                            <td>
-
-                                                <div className="employee-actions">
-
-                                                    <button
-                                                        className="edit-button"
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setEditingEmployee(employee)
-                                                        }
-                                                    >
-                                                        Edit
-                                                    </button>
-
-                                                    <button
-                                                        className="delete-button"
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setDeletingEmployee(employee)
-                                                        }
-                                                    >
-                                                        Delete
-                                                    </button>
-
-                                                </div>
-
-                                            </td>
-
                                         </tr>
+                                    ) : (
+                                        filteredEmployees.map((employee) => (
+                                            <tr key={employee.id}>
+                                                <td>
+                                                    <div className="employee-info">
+                                                        <div className="employee-avatar">
+                                                            {employee.firstName
+                                                                ?.charAt(0)
+                                                                .toUpperCase()}
+                                                            {employee.lastName
+                                                                ?.charAt(0)
+                                                                .toUpperCase()}
+                                                        </div>
 
-                                    ))
+                                                        <div className="employee-details">
+                                                            <strong>
+                                                                {employee.firstName}{' '}
+                                                                {employee.lastName}
+                                                            </strong>
 
-                                )}
+                                                            <span>
+                                                                    {employee.email}
+                                                                </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
 
-                            </tbody>
+                                                <td>{employee.jobTitle || '-'}</td>
+                                                <td>{employee.role || '-'}</td>
 
-                        </table>
+                                                <td>
+                                                        <span
+                                                            className={`status-badge ${
+                                                                employee.employmentStatus?.toLowerCase()
+                                                            }`}
+                                                        >
+                                                            {employee.employmentStatus || '-'}
+                                                        </span>
+                                                </td>
 
+                                                <td>
+                                                    {employee.joiningDate || '-'}
+                                                </td>
+
+                                                <td>
+                                                    <div className="employee-actions">
+                                                        <button
+                                                            className="edit-button"
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setEditingEmployee(employee)
+                                                            }
+                                                        >
+                                                            Edit
+                                                        </button>
+
+                                                        <button
+                                                            className="delete-button"
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setDeletingEmployee(employee)
+                                                            }
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
-
                 )}
-
-            </div>
-
+            </main>
         </div>
     )
 }
 
 export default Employees
-
