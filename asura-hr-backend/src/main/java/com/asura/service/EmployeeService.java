@@ -9,7 +9,6 @@ import java.util.List;
 @Service
 public class EmployeeService {
 
-
     private final EmployeeRepository employeeRepository;
 
     public EmployeeService(EmployeeRepository employeeRepository) {
@@ -47,23 +46,29 @@ public class EmployeeService {
 
         validateJobTitle(employee.getJobTitle());
 
-        validateJobDescription(employee.getJobDescription());
-
         return employeeRepository.save(employee);
     }
 
     // Update employee
-    public Employee updateEmployee(Long id, Employee updatedEmployee) {
+    public Employee updateEmployee(
+            Long id,
+            Employee updatedEmployee) {
 
-        Employee existingEmployee = getEmployeeById(id);
+        Employee existingEmployee =
+                getEmployeeById(id);
 
+        // Email validation
         if (updatedEmployee.getEmail() != null) {
 
             String updatedEmail =
-                    updatedEmployee.getEmail().trim().toLowerCase();
+                    updatedEmployee.getEmail()
+                            .trim()
+                            .toLowerCase();
 
-            if (!updatedEmail.equalsIgnoreCase(existingEmployee.getEmail())
-                    && employeeRepository.existsByEmail(updatedEmail)) {
+            if (!updatedEmail.equalsIgnoreCase(
+                    existingEmployee.getEmail())
+                    && employeeRepository.existsByEmail(
+                    updatedEmail)) {
 
                 throw new RuntimeException(
                         "Email address already exists. Please use a different email address."
@@ -73,12 +78,14 @@ public class EmployeeService {
             existingEmployee.setEmail(updatedEmail);
         }
 
-        validatePhoneNumber(updatedEmployee.getPhone());
+        // Same phone validation as Add Employee
+        validatePhoneNumber(
+                updatedEmployee.getPhone()
+        );
 
-        validateJobTitle(updatedEmployee.getJobTitle());
-
-        validateJobDescription(
-                updatedEmployee.getJobDescription()
+        // Same job title validation as Add Employee
+        validateJobTitle(
+                updatedEmployee.getJobTitle()
         );
 
         existingEmployee.setFirstName(
@@ -101,10 +108,6 @@ public class EmployeeService {
                 updatedEmployee.getJobTitle()
         );
 
-        existingEmployee.setJobDescription(
-                updatedEmployee.getJobDescription()
-        );
-
         existingEmployee.setRole(
                 updatedEmployee.getRole()
         );
@@ -117,14 +120,18 @@ public class EmployeeService {
                 updatedEmployee.getEmploymentStatus()
         );
 
-        return employeeRepository.save(existingEmployee);
+        return employeeRepository.save(
+                existingEmployee
+        );
     }
 
     // Delete employee
     public void deleteEmployee(Long id) {
 
         if (!employeeRepository.existsById(id)) {
-            throw new RuntimeException("Employee not found");
+            throw new RuntimeException(
+                    "Employee not found"
+            );
         }
 
         employeeRepository.deleteById(id);
@@ -133,24 +140,31 @@ public class EmployeeService {
     // Validate phone number
     private void validatePhoneNumber(String phone) {
 
-        if (phone == null || phone.trim().isEmpty()) {
+        if (phone == null ||
+                phone.trim().isEmpty()) {
+
             throw new RuntimeException(
                     "Phone number is required."
             );
         }
 
-        String cleanedPhone = phone.trim();
+        String cleanedPhone =
+                phone.trim();
 
         if (!cleanedPhone.matches(
                 "^\\+?[0-9][0-9\\s()-]*$"
         )) {
+
             throw new RuntimeException(
                     "Phone number can contain only numbers, spaces, +, hyphens and brackets."
             );
         }
 
         String digitsOnly =
-                cleanedPhone.replaceAll("\\D", "");
+                cleanedPhone.replaceAll(
+                        "\\D",
+                        ""
+                );
 
         if (digitsOnly.length() < 9 ||
                 digitsOnly.length() > 15) {
@@ -160,14 +174,20 @@ public class EmployeeService {
             );
         }
 
-        if (digitsOnly.matches("^(\\d)\\1+$")) {
+        // Reject 0000000000, 1111111111, etc.
+        if (digitsOnly.matches(
+                "^(\\d)\\1+$"
+        )) {
 
             throw new RuntimeException(
                     "Please enter a valid phone number."
             );
         }
 
-        if (digitsOnly.equals("1234567890")) {
+        // Reject obvious sequential number
+        if (digitsOnly.equals(
+                "1234567890"
+        )) {
 
             throw new RuntimeException(
                     "Please enter a valid phone number."
@@ -176,63 +196,39 @@ public class EmployeeService {
     }
 
     // Validate job title
-    private void validateJobTitle(String jobTitle) {
+    private void validateJobTitle(
+            String jobTitle) {
 
-        if (jobTitle == null || jobTitle.trim().isEmpty()) {
+        if (jobTitle == null ||
+                jobTitle.trim().isEmpty()) {
+
             throw new RuntimeException(
                     "Job title is required."
             );
         }
 
-        String cleanedJobTitle = jobTitle.trim();
+        String cleanedJobTitle =
+                jobTitle.trim();
 
+        // Must contain at least one letter
+        // This rejects values such as ''''''' or !!!!!!
         if (!cleanedJobTitle.matches(
                 ".*[A-Za-zÀ-ÿ].*"
         )) {
+
             throw new RuntimeException(
                     "Please enter a valid job title."
             );
         }
 
+        // Allowed job-title characters
         if (!cleanedJobTitle.matches(
                 "[A-Za-zÀ-ÿ0-9 '&/().,-]+"
         )) {
+
             throw new RuntimeException(
                     "Please enter a valid job title."
             );
         }
     }
-
-    // Validate job description
-    private void validateJobDescription(String jobDescription) {
-
-        if (jobDescription == null ||
-                jobDescription.trim().isEmpty()) {
-
-            throw new RuntimeException(
-                    "Job description is required."
-            );
-        }
-
-        String cleanedJobDescription =
-                jobDescription.trim();
-
-        if (!cleanedJobDescription.matches(
-                ".*[A-Za-zÀ-ÿ].*"
-        )) {
-            throw new RuntimeException(
-                    "Please enter a valid job description."
-            );
-        }
-
-        if (!cleanedJobDescription.matches(
-                "[A-Za-zÀ-ÿ0-9 '&/().,\\-]+"
-        )) {
-            throw new RuntimeException(
-                    "Please enter a valid job description."
-            );
-        }
-    }
-
-
 }

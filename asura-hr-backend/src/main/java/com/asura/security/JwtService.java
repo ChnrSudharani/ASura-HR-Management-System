@@ -22,12 +22,25 @@ public class JwtService {
     }
 
     public String generateToken(String email, String role) {
+        return generateToken(email, role, false);
+    }
+
+    public String generateToken(
+            String email,
+            String role,
+            boolean rememberMe) {
+
+        long duration = rememberMe
+                ? 7L * 24 * 60 * 60 * 1000
+                : 60L * 60 * 1000;
 
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .expiration(new Date(
+                        System.currentTimeMillis() + duration
+                ))
                 .signWith(secretKey)
                 .compact();
     }

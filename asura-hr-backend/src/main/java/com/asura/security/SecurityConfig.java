@@ -1,8 +1,10 @@
+
 package com.asura.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,17 +14,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import java.util.List;
-@EnableMethodSecurity
 
+@EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -38,51 +40,42 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
 
-                .cors(cors ->
-                        cors.configurationSource(
-                                corsConfigurationSource()
-                        )
-                )
+                .cors(cors -> cors.configurationSource(
+                        corsConfigurationSource()))
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
+                                SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // CORS preflight requests
                         .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
-                        ).permitAll()
+                                HttpMethod.OPTIONS, "/**")
+                        .permitAll()
 
-                        // Login and registration
-                        .requestMatchers(
-                                "/api/auth/**"
-                        ).permitAll()
+                        // Existing authentication endpoints
+                        .requestMatchers("/api/auth/**")
+                        .permitAll()
 
-                        // HR Admin only
-                        .requestMatchers(
-                                "/api/test/admin"
-                        ).hasRole("HR_ADMIN")
+                        // Existing role-specific test endpoints
+                        .requestMatchers("/api/test/admin")
+                        .hasRole("HR_ADMIN")
 
-                        // Manager only
-                        .requestMatchers(
-                                "/api/test/manager"
-                        ).hasRole("MANAGER")
+                        .requestMatchers("/api/test/manager")
+                        .hasRole("MANAGER")
 
-                        // Employee only
-                        .requestMatchers(
-                                "/api/test/employee"
-                        ).hasRole("EMPLOYEE")
+                        .requestMatchers("/api/test/employee")
+                        .hasRole("EMPLOYEE")
 
-                        // Everything else requires authentication
-                        .anyRequest().authenticated()
+                        // Only HR Admin can manage user accounts
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("HR_ADMIN")
+
+                        // All remaining endpoints require authentication
+                        .anyRequest()
+                        .authenticated()
                 )
 
-                // Run our JWT filter before Spring's username/password filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -97,26 +90,21 @@ public class SecurityConfig {
         CorsConfiguration configuration =
                 new CorsConfiguration();
 
-        configuration.setAllowedOrigins(
-                List.of(
-                        "http://localhost:5173",
-                        "http://127.0.0.1:5173"
-                )
-        );
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"
+        ));
 
-        configuration.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "DELETE",
-                        "OPTIONS"
-                )
-        );
+        configuration.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+        ));
 
-        configuration.setAllowedHeaders(
-                List.of("*")
-        );
+        configuration.setAllowedHeaders(List.of("*"));
 
         configuration.setAllowCredentials(true);
 
