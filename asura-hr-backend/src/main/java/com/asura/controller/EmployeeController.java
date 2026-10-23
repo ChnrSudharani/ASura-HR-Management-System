@@ -98,9 +98,9 @@ public class EmployeeController {
         }
     }
 
-    // Update employee: HR_ADMIN only
+    // Update employee: HR_ADMIN and MANAGER
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'MANAGER')")
     public ResponseEntity<Employee> updateEmployee(
             @PathVariable Long id,
             @RequestBody Employee employee) {
@@ -110,9 +110,9 @@ public class EmployeeController {
         );
     }
 
-    // Delete employee: HR_ADMIN only
+    // Delete employee: HR_ADMIN and MANAGER
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('HR_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR_ADMIN', 'MANAGER')")
     public ResponseEntity<String> deleteEmployee(
             @PathVariable Long id) {
 
