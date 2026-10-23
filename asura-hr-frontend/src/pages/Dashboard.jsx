@@ -1,4 +1,5 @@
 
+import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import PageHeader from '../components/PageHeader'
 import './Dashboard.css'
@@ -10,6 +11,122 @@ function Dashboard({
                        onAttendanceClick,
                        onLeaveClick,
                    }) {
+    const [resetEmail, setResetEmail] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [showResetPassword, setShowResetPassword] = useState(false)
+    const [isResetting, setIsResetting] = useState(false)
+    const [resetMessage, setResetMessage] = useState('')
+    const [resetError, setResetError] = useState(false)
+
+    // Read the signed-in user's stored role.
+    const storedUser = (() => {
+        try {
+            const savedUser =
+                localStorage.getItem('user') ||
+                sessionStorage.getItem('user')
+
+            return savedUser ? JSON.parse(savedUser) : null
+        } catch {
+            return null
+        }
+    })()
+
+    const isHrAdmin =
+        storedUser?.role?.toUpperCase() === 'HR_ADMIN'
+
+    const handlePasswordReset = async (event) => {
+        event.preventDefault()
+
+        setResetMessage('')
+        setResetError(false)
+
+        const trimmedEmail = resetEmail.trim()
+
+        if (!trimmedEmail) {
+            setResetError(true)
+            setResetMessage('Please enter the user email address.')
+            return
+        }
+
+        if (!newPassword || newPassword.length < 8) {
+            setResetError(true)
+            setResetMessage(
+                'The new password must contain at least 8 characters.'
+            )
+            return
+        }
+
+        const token =
+            localStorage.getItem('token') ||
+            sessionStorage.getItem('token')
+
+        if (!token) {
+            setResetError(true)
+            setResetMessage(
+                'Your session has expired. Please sign in again.'
+            )
+            return
+        }
+
+        setIsResetting(true)
+
+        try {
+            const response = await fetch(
+                'http://localhost:8080/api/admin/users/password',
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        email: trimmedEmail,
+                        newPassword,
+                    }),
+                }
+            )
+
+            const responseText = await response.text()
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error(
+                        'Your session has expired. Please sign in again.'
+                    )
+                }
+
+                if (response.status === 403) {
+                    throw new Error(
+                        'You are not authorised to reset passwords.'
+                    )
+                }
+
+                throw new Error(
+                    responseText ||
+                    `Password reset failed (HTTP ${response.status}).`
+                )
+            }
+
+            setResetError(false)
+            setResetMessage(
+                'Password reset successfully. The user can now sign in with the new password.'
+            )
+            setResetEmail('')
+            setNewPassword('')
+            setShowResetPassword(false)
+        } catch (error) {
+            setResetError(true)
+            setResetMessage(
+                error instanceof TypeError
+                    ? 'Cannot connect to the backend. Check that Spring Boot is running.'
+                    : error.message || 'Unable to reset the password.'
+            )
+        } finally {
+            setIsResetting(false)
+        }
+    }
+
     return (
         <div className="dashboard-page">
             <Sidebar
@@ -181,6 +298,138 @@ function Dashboard({
                             </button>
                         </div>
                     </div>
+
+                    {isHrAdmin && (
+                        <div
+                            className="dashboard-panel"
+                            style={{ marginTop: '24px' }}
+                        >
+                            <div className="panel-header">
+                                <div>
+                                    <h3>Reset User Password</h3>
+                                    <p>
+                                        Set a new password for an existing
+                                        user account.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {!showResetPassword ? (
+                                <button
+                                    type="button"
+                                    className="quick-action"
+                                    onClick={() => {
+                                        setShowResetPassword(true)
+                                        setResetMessage('')
+                                        setResetError(false)
+                                    }}
+                                >
+                                    <span>🔐</span>
+                                    <div>
+                                        <strong>Reset Password</strong>
+                                        <small>
+                                            Enter the user's email and new
+                                            password
+                                        </small>
+                                    </div>
+                                </button>
+                            ) : (
+                                <form
+                                    onSubmit={handlePasswordReset}
+                                    className="password-reset-form"
+                                >
+                                    <div className="form-group">
+                                        <label htmlFor="reset-email">
+                                            User email address
+                                        </label>
+                                        <input
+                                            id="reset-email"
+                                            type="email"
+                                            value={resetEmail}
+                                            onChange={(event) =>
+                                                setResetEmail(
+                                                    event.target.value
+                                                )
+                                            }
+                                            placeholder="Enter existing user's email"
+                                            autoComplete="off"
+                                            required
+                                            disabled={isResetting}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="new-password">
+                                            New password
+                                        </label>
+                                        <input
+                                            id="new-password"
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(event) =>
+                                                setNewPassword(
+                                                    event.target.value
+                                                )
+                                            }
+                                            placeholder="Enter new password"
+                                            autoComplete="new-password"
+                                            minLength={8}
+                                            required
+                                            disabled={isResetting}
+                                        />
+                                        <small>
+                                            Must contain at least 8 characters.
+                                        </small>
+                                    </div>
+
+                                    {resetMessage && (
+                                        <p
+                                            className={
+                                                resetError
+                                                    ? 'error-message'
+                                                    : 'success-message'
+                                            }
+                                            role="status"
+                                        >
+                                            {resetMessage}
+                                        </p>
+                                    )}
+
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            gap: '12px',
+                                            flexWrap: 'wrap',
+                                        }}
+                                    >
+                                        <button
+                                            type="submit"
+                                            className="login-button"
+                                            disabled={isResetting}
+                                        >
+                                            {isResetting
+                                                ? 'Resetting...'
+                                                : 'Reset Password'}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowResetPassword(false)
+                                                setResetEmail('')
+                                                setNewPassword('')
+                                                setResetMessage('')
+                                                setResetError(false)
+                                            }}
+                                            disabled={isResetting}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
+                    )}
                 </section>
             </main>
         </div>

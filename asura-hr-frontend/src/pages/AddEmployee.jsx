@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import './AddEmployee.css'
 
@@ -32,6 +33,38 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
         }))
     }
 
+    // Retrieve the token from the storage containing the saved user.
+    const getAuthToken = () => {
+        const storages = [localStorage, sessionStorage]
+
+        for (const storage of storages) {
+            const token = storage.getItem('token')
+            const savedUser = storage.getItem('user')
+
+            if (
+                !token ||
+                token.trim() === '' ||
+                token === 'null' ||
+                token === 'undefined' ||
+                !savedUser
+            ) {
+                continue
+            }
+
+            try {
+                const user = JSON.parse(savedUser)
+
+                if (user.email && user.role) {
+                    return token.trim()
+                }
+            } catch {
+                // Ignore invalid user data and check the next storage.
+            }
+        }
+
+        return null
+    }
+
     const validateForm = () => {
         const newErrors = {}
 
@@ -43,8 +76,7 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
         const jobTitle = formData.jobTitle.trim()
         const role = formData.role.trim()
         const joiningDate = formData.joiningDate.trim()
-        const employmentStatus =
-            formData.employmentStatus.trim()
+        const employmentStatus = formData.employmentStatus.trim()
 
         const namePattern =
             /^[A-Za-zÀ-ÿ]+(?:[ '-][A-Za-zÀ-ÿ]+)*$/
@@ -52,96 +84,70 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
         const emailPattern =
             /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/
 
-        const phonePattern =
-            /^\+?[0-9][0-9\s()-]*$/
+        const phonePattern = /^\+?[0-9][0-9\s()-]*$/
 
         const jobTitlePattern =
             /^(?=.*[A-Za-zÀ-ÿ])[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 '&/().,-]*$/
 
-        // First Name
         if (!firstName) {
-            newErrors.firstName =
-                'First name is required.'
+            newErrors.firstName = 'First name is required.'
         } else if (!namePattern.test(firstName)) {
             newErrors.firstName =
                 'First name can contain only letters, spaces, hyphens or apostrophes.'
         }
 
-        // Last Name
         if (!lastName) {
-            newErrors.lastName =
-                'Last name is required.'
+            newErrors.lastName = 'Last name is required.'
         } else if (!namePattern.test(lastName)) {
             newErrors.lastName =
                 'Last name can contain only letters, spaces, hyphens or apostrophes.'
         }
 
-        // Email
         if (!email) {
-            newErrors.email =
-                'Email address is required.'
+            newErrors.email = 'Email address is required.'
         } else if (/\s/.test(email)) {
-            newErrors.email =
-                'Email address must not contain spaces.'
+            newErrors.email = 'Email address must not contain spaces.'
         } else if (!emailPattern.test(email)) {
             newErrors.email =
                 'Please enter a valid email address, for example name@example.com.'
         }
 
-        // Phone
         if (!phone) {
-            newErrors.phone =
-                'Phone number is required.'
+            newErrors.phone = 'Phone number is required.'
         } else if (!phonePattern.test(phone)) {
             newErrors.phone =
                 'Phone number can contain only numbers, spaces, +, hyphens and brackets.'
         } else {
-            const digitsOnly =
-                phone.replace(/\D/g, '')
+            const digitsOnly = phone.replace(/\D/g, '')
 
-            if (
-                digitsOnly.length < 9 ||
-                digitsOnly.length > 15
-            ) {
+            if (digitsOnly.length < 9 || digitsOnly.length > 15) {
                 newErrors.phone =
                     'Phone number must contain between 9 and 15 digits.'
             } else if (/^(\d)\1+$/.test(digitsOnly)) {
-                newErrors.phone =
-                    'Please enter a valid phone number.'
+                newErrors.phone = 'Please enter a valid phone number.'
             } else if (digitsOnly === '1234567890') {
-                newErrors.phone =
-                    'Please enter a valid phone number.'
+                newErrors.phone = 'Please enter a valid phone number.'
             }
         }
 
-        // Department
         if (!department) {
-            newErrors.department =
-                'Department is required.'
+            newErrors.department = 'Department is required.'
         }
 
-        // Job Title
         if (!jobTitle) {
-            newErrors.jobTitle =
-                'Job title is required.'
+            newErrors.jobTitle = 'Job title is required.'
         } else if (!jobTitlePattern.test(jobTitle)) {
-            newErrors.jobTitle =
-                'Please enter a valid job title.'
+            newErrors.jobTitle = 'Please enter a valid job title.'
         }
 
-        // Role
         if (!role) {
-            newErrors.role =
-                'Please select an employee role.'
+            newErrors.role = 'Please select an employee role.'
         }
 
-        // Joining Date
         if (!joiningDate) {
-            newErrors.joiningDate =
-                'Joining date is required.'
+            newErrors.joiningDate = 'Joining date is required.'
         }
 
-        // Employment Status
         if (!employmentStatus) {
             newErrors.employmentStatus =
                 'Please select an employment status.'
@@ -155,17 +161,22 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
     const handleSubmit = async (event) => {
         event.preventDefault()
 
-        const isValid = validateForm()
-
-        if (!isValid) {
+        if (!validateForm()) {
             return
         }
 
         try {
             setSaving(true)
+            setErrors({})
 
-            const token =
-                localStorage.getItem('token')
+            const token = getAuthToken()
+
+            if (!token) {
+                setErrors({
+                    form: 'Your login token is missing. Please log out and log in again.'
+                })
+                return
+            }
 
             const cleanedData = {
                 firstName: formData.firstName.trim(),
@@ -176,8 +187,7 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                 jobTitle: formData.jobTitle.trim(),
                 role: formData.role.trim(),
                 joiningDate: formData.joiningDate,
-                employmentStatus:
-                    formData.employmentStatus.trim()
+                employmentStatus: formData.employmentStatus.trim()
             }
 
             const response = await fetch(
@@ -186,23 +196,29 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'Bearer ' + token
+                        Authorization: `Bearer ${token}`
                     },
                     body: JSON.stringify(cleanedData)
                 }
             )
 
             if (!response.ok) {
-                const message =
-                    await response.text()
+                const message = await response.text()
+                const lowerMessage = message.toLowerCase()
+
+                if (response.status === 401 || response.status === 403) {
+                    setErrors({
+                        form:
+                            response.status === 403
+                                ? 'Access denied. The server rejected this request. Please check your account permissions and login session.'
+                                : 'Your session has expired. Please log out and log in again.'
+                    })
+                    return
+                }
 
                 if (
-                    message.toLowerCase().includes(
-                        'email address already exists'
-                    ) ||
-                    message.toLowerCase().includes(
-                        'email already exists'
-                    )
+                    lowerMessage.includes('email address already exists') ||
+                    lowerMessage.includes('email already exists')
                 ) {
                     setErrors((currentErrors) => ({
                         ...currentErrors,
@@ -210,57 +226,43 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             'Email address already exists. Please use a different email address.',
                         form: ''
                     }))
-
                     return
                 }
 
                 if (
-                    message.toLowerCase().includes(
-                        'phone number'
-                    ) ||
-                    message.toLowerCase().includes(
-                        'valid phone number'
-                    )
+                    lowerMessage.includes('phone number') ||
+                    lowerMessage.includes('valid phone number')
                 ) {
                     setErrors((currentErrors) => ({
                         ...currentErrors,
                         phone: message,
                         form: ''
                     }))
-
                     return
                 }
 
-                if (
-                    message.toLowerCase().includes(
-                        'job title'
-                    )
-                ) {
+                if (lowerMessage.includes('job title')) {
                     setErrors((currentErrors) => ({
                         ...currentErrors,
                         jobTitle: message,
                         form: ''
                     }))
-
                     return
                 }
 
                 throw new Error(
-                    message ||
-                    'Unable to create employee.'
+                    message || `Unable to create employee (${response.status}).`
                 )
             }
 
-            const newEmployee =
-                await response.json()
+            const newEmployee = await response.json()
 
             onEmployeeAdded(newEmployee)
             onClose()
-
         } catch (err) {
             setErrors((currentErrors) => ({
                 ...currentErrors,
-                form: err.message
+                form: err.message || 'Unable to create employee.'
             }))
         } finally {
             setSaving(false)
@@ -269,15 +271,10 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
 
     return (
         <div className="add-employee-card">
-
             <div className="add-employee-header">
-
                 <div>
                     <h2>Add Employee</h2>
-
-                    <p>
-                        Enter the employee details below.
-                    </p>
+                    <p>Enter the employee details below.</p>
                 </div>
 
                 <button
@@ -288,27 +285,18 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                 >
                     ×
                 </button>
-
             </div>
 
             {errors.form && (
-                <div className="add-employee-error">
+                <div className="add-employee-error" role="alert">
                     {errors.form}
                 </div>
             )}
 
             <form onSubmit={handleSubmit}>
-
                 <div className="add-employee-form-grid">
-
-                    {/* First Name */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="firstName">
-                            First Name
-                        </label>
-
+                        <label htmlFor="firstName">First Name</label>
                         <input
                             id="firstName"
                             type="text"
@@ -316,23 +304,15 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             value={formData.firstName}
                             onChange={handleInputChange}
                         />
-
                         {errors.firstName && (
                             <div className="field-error">
                                 {errors.firstName}
                             </div>
                         )}
-
                     </div>
 
-                    {/* Last Name */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="lastName">
-                            Last Name
-                        </label>
-
+                        <label htmlFor="lastName">Last Name</label>
                         <input
                             id="lastName"
                             type="text"
@@ -340,23 +320,15 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             value={formData.lastName}
                             onChange={handleInputChange}
                         />
-
                         {errors.lastName && (
                             <div className="field-error">
                                 {errors.lastName}
                             </div>
                         )}
-
                     </div>
 
-                    {/* Email */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="email">
-                            Email Address
-                        </label>
-
+                        <label htmlFor="email">Email Address</label>
                         <input
                             id="email"
                             type="text"
@@ -364,23 +336,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             value={formData.email}
                             onChange={handleInputChange}
                         />
-
                         {errors.email && (
-                            <div className="field-error">
-                                {errors.email}
-                            </div>
+                            <div className="field-error">{errors.email}</div>
                         )}
-
                     </div>
 
-                    {/* Phone */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="phone">
-                            Phone Number
-                        </label>
-
+                        <label htmlFor="phone">Phone Number</label>
                         <input
                             id="phone"
                             type="text"
@@ -388,23 +350,13 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             value={formData.phone}
                             onChange={handleInputChange}
                         />
-
                         {errors.phone && (
-                            <div className="field-error">
-                                {errors.phone}
-                            </div>
+                            <div className="field-error">{errors.phone}</div>
                         )}
-
                     </div>
 
-                    {/* Department */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="department">
-                            Department
-                        </label>
-
+                        <label htmlFor="department">Department</label>
                         <input
                             id="department"
                             type="text"
@@ -412,23 +364,15 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             value={formData.department}
                             onChange={handleInputChange}
                         />
-
                         {errors.department && (
                             <div className="field-error">
                                 {errors.department}
                             </div>
                         )}
-
                     </div>
 
-                    {/* Job Title */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="jobTitle">
-                            Job Title
-                        </label>
-
+                        <label htmlFor="jobTitle">Job Title</label>
                         <input
                             id="jobTitle"
                             type="text"
@@ -436,62 +380,33 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             value={formData.jobTitle}
                             onChange={handleInputChange}
                         />
-
                         {errors.jobTitle && (
                             <div className="field-error">
                                 {errors.jobTitle}
                             </div>
                         )}
-
                     </div>
 
-                    {/* Role */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="role">
-                            Role
-                        </label>
-
+                        <label htmlFor="role">Role</label>
                         <select
                             id="role"
                             name="role"
                             value={formData.role}
                             onChange={handleInputChange}
                         >
-                            <option value="">
-                                Select Role
-                            </option>
-
-                            <option value="HR_ADMIN">
-                                HR Admin
-                            </option>
-
-                            <option value="MANAGER">
-                                Manager
-                            </option>
-
-                            <option value="EMPLOYEE">
-                                Employee
-                            </option>
+                            <option value="">Select Role</option>
+                            <option value="HR_ADMIN">HR Admin</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="EMPLOYEE">Employee</option>
                         </select>
-
                         {errors.role && (
-                            <div className="field-error">
-                                {errors.role}
-                            </div>
+                            <div className="field-error">{errors.role}</div>
                         )}
-
                     </div>
 
-                    {/* Joining Date */}
-
                     <div className="add-employee-field">
-
-                        <label htmlFor="joiningDate">
-                            Joining Date
-                        </label>
-
+                        <label htmlFor="joiningDate">Joining Date</label>
                         <input
                             id="joiningDate"
                             type="date"
@@ -499,54 +414,36 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                             value={formData.joiningDate}
                             onChange={handleInputChange}
                         />
-
                         {errors.joiningDate && (
                             <div className="field-error">
                                 {errors.joiningDate}
                             </div>
                         )}
-
                     </div>
 
-                    {/* Employment Status */}
-
                     <div className="add-employee-field">
-
                         <label htmlFor="employmentStatus">
                             Employment Status
                         </label>
-
                         <select
                             id="employmentStatus"
                             name="employmentStatus"
                             value={formData.employmentStatus}
                             onChange={handleInputChange}
                         >
-                            <option value="">
-                                Select Status
-                            </option>
-
-                            <option value="ACTIVE">
-                                Active
-                            </option>
-
-                            <option value="INACTIVE">
-                                Inactive
-                            </option>
+                            <option value="">Select Status</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
                         </select>
-
                         {errors.employmentStatus && (
                             <div className="field-error">
                                 {errors.employmentStatus}
                             </div>
                         )}
-
                     </div>
-
                 </div>
 
                 <div className="add-employee-actions">
-
                     <button
                         type="button"
                         className="add-employee-back"
@@ -570,15 +467,10 @@ function AddEmployee({ onClose, onEmployeeAdded }) {
                         className="add-employee-save"
                         disabled={saving}
                     >
-                        {saving
-                            ? 'Saving...'
-                            : 'Add Employee'}
+                        {saving ? 'Saving...' : 'Add Employee'}
                     </button>
-
                 </div>
-
             </form>
-
         </div>
     )
 }
