@@ -115,6 +115,7 @@ function DeleteEmployee({
             </div>
         </div>
     )
+
 }
 
 export default DeleteEmployee
